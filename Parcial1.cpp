@@ -120,6 +120,19 @@ int main(){
 	cout<<listaIns->toPrint(); */
 	
 	//TO DO: leer e identificar instrucciones
-		
+	while(!listaIns->esvacia()){
+		if(listaIns->cabeza().at(3) == 'I' && listaIns->cabeza().at(4) == 'N')
+			cout << "Declaracion de variable" << endl;
+		if(listaIns->cabeza().at(3) >= 'a' && listaIns->cabeza().at(3) <= 'z')
+			cout << "Asignacion" << endl;
+		if(listaIns->cabeza().at(3) == 'I' && listaIns->cabeza().at(4) == 'F')
+			cout<<"Condicional" << endl;
+		if(listaIns->cabeza().at(3) == 'J')
+			cout << "Jump" << endl;
+		if(listaIns->cabeza().at(3) == 'S')
+			cout<<"Show" << endl;
+		listaIns->del();
+	}
+	
 	
 }
