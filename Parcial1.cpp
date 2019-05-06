@@ -91,8 +91,6 @@ string Lista::toPrint(){
 Nodo* Lista::last(void){
 		if(this->czo->get_next()==NULL) return czo;
 		else this->resto()->last();
-	
-	
 }
 
 //------------------Fin metodos de lista----------------------------
@@ -112,18 +110,16 @@ int main(){
 	while(!archivo.eof()){ // mientras no sea el final del archivo
 		getline(archivo, instruccion);
 		listaIns->add(instruccion);
-		//cout << listaIns->last()->get_dato() <<endl;
 	}
 	archivo.close();
 	
-	cout<<"cabeza: " << listaIns->cabeza() << endl;
+	/*cout<<"cabeza: " << listaIns->cabeza() << endl;
 	cout<< "last: " << listaIns->last()->get_dato() << endl;
 	cout<<listaIns->toPrint();
-
 	listaIns->del();
-	//cout<<listaIns->toPrint();
-	//cout<<"cabeza: " << listaIns->cabeza();
-	cout<<listaIns->toPrint();
+	cout<<listaIns->toPrint(); */
+	
+	//TO DO: leer e identificar instrucciones
 		
 	
 }
