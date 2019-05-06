@@ -1,0 +1,9 @@
+1. INT a
+2. INT b
+3. a = 4
+4. b = 1
+5. IF ( a < 1) THEN JUMP 9
+6. b = b * a
+7. a = a - 1
+8. JUMP 5
+9. SHOW b

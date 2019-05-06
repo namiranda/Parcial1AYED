@@ -56,7 +56,7 @@ void Lista::del(void) //borra la cabeza
 void Lista::add(tipolista d) //agrega un nodo al final de la lista
 {  
 	Nodo *nuevo=new Nodo(d);
-	last()->set_next(nuevo);
+	 last()->set_next(nuevo);
     
 }
 bool Lista::esvacia(void)
@@ -70,10 +70,10 @@ tipolista Lista::cabeza(void)
                 cout<<" Error, Cabeza de lista vacia";
                 return "" ; 
   }
-  return czo->get_dato();
+  return czo->get_next()->get_dato();
 }
 
-Lista *Lista::resto(void)
+Lista* Lista::resto(void)
 { 
       Lista *l=new Lista(czo->get_next());
       return (l);
@@ -84,13 +84,13 @@ string Lista::toPrint(){
 	 if (this->esvacia()) {
         return s;
      } else {
-        s += "\n" + this->cabeza() + this->resto()->toPrint();
+        s += this->cabeza() + "\n" + this->resto()->toPrint();
        return s;
      }
 }
 Nodo* Lista::last(void){
-		if(czo->get_next()==NULL) return czo;
-		else resto()->last();
+		if(this->czo->get_next()==NULL) return czo;
+		else this->resto()->last();
 	
 	
 }
@@ -112,14 +112,18 @@ int main(){
 	while(!archivo.eof()){ // mientras no sea el final del archivo
 		getline(archivo, instruccion);
 		listaIns->add(instruccion);
+		//cout << listaIns->last()->get_dato() <<endl;
 	}
-	cout<<"cabeza: " << listaIns->cabeza();
-	cout<<listaIns->toPrint();
-	cout<<"cabeza: " << listaIns->cabeza();
-	listaIns->del();
+	archivo.close();
+	
+	cout<<"cabeza: " << listaIns->cabeza() << endl;
+	cout<< "last: " << listaIns->last()->get_dato() << endl;
 	cout<<listaIns->toPrint();
 
-	archivo.close();	
+	listaIns->del();
+	//cout<<listaIns->toPrint();
+	//cout<<"cabeza: " << listaIns->cabeza();
+	cout<<listaIns->toPrint();
 		
 	
 }
