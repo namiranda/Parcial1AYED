@@ -175,8 +175,14 @@ int Asignacion::buscaValor(Cola *lista, char c){
 }
 */
 void Asignacion::asigna(Cola* lista){
-	if(this->getInstruccion().at(7)>='0' && this->getInstruccion().at(7)<='9')
+	if(this->getInstruccion().at(7)>='0' && this->getInstruccion().at(7)<='9') //numero entero
 		buscaVar(lista, this->getInstruccion().at(3))->setValor(this->getInstruccion().at(7)-'0');
+	if(this->getInstruccion().at(7)>='a' && this->getInstruccion().at(7)<='z'){
+		if(this->getInstruccion().size()-1 == 7){
+			int v = buscaVar(lista, this->getInstruccion().at(7))->getValor(); //valor de la variable a la derecha
+			buscaVar(lista, this->getInstruccion().at(3))->setValor(v); //asigno valor a variable mas a la izquierda	
+		}
+	}
 	
 }
 
@@ -184,7 +190,6 @@ Nodo* Asignacion::buscaVar(Cola* lista, char c){
 	if(lista->ultimo()->get_dato()->getInstruccion().at(7) == c)
 		return lista->ultimo();
 	else buscaVar(lista->restoC(),c);	
-	
 }
 
 int main(){
@@ -206,11 +211,7 @@ int main(){
 		listaIns->encolar(new Instruccion(instruccion));
 	}
 	archivo.close(); 
-	/*while(!listaIns->esvacia()){
-		cout << listaIns->restoC()->ultimo()->get_dato()->getInstruccion();
-		listaIns->borrar();
-	}
-	*/
+
 	//Este bloque identifica las instrucciones
 	while(!listaIns->esvacia()){
 		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'I' && listaIns->tope()->get_dato()->getInstruccion().at(4) == 'N'){
@@ -223,9 +224,8 @@ int main(){
 			//listaVar->impre();
 			//cout << a->getInstruccion();
 			a->asigna(listaVar);
-			cout<< listaVar->ultimo()->getValor();
-			cout << listaVar->tope()->getValor();	
-		
+			cout << listaVar->tope()->getValor();
+			cout << listaVar->ultimo()->getValor();
 		}
 		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'I' && listaIns->tope()->get_dato()->getInstruccion().at(4) == 'F')
 			cout<<"Condicional" << endl;
