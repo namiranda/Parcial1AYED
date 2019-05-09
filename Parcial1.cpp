@@ -8,8 +8,8 @@ using namespace std;
 class Instruccion{
 	protected: string instruccion;
 	public: 
-			Instruccion(string s){instruccion = s;}
-			string getInstruccion(){return instruccion;}
+			Instruccion(string s){instruccion = s;};
+			string getInstruccion(){return instruccion;};
 };
 
 class Nodo{
@@ -82,10 +82,10 @@ bool Lista::esvacia(void)
 }
 Nodo* Lista::cabeza(void)
 { 
-  if(this->esvacia()){
+ /* if(this->esvacia()){
                 cout<<" Error, Cabeza de lista vacia";
                 return 0; 
-  }
+  }*/
   return czo;
 }
 Lista *Lista::resto(void)
@@ -128,6 +128,7 @@ void Lista::borrar_last()
 class Cola:public Lista{
   public:
       Cola(void){Lista();};
+      Cola(Nodo* n):Lista(n){};
       ~Cola(void);
       Nodo* tope();
       bool colavacia(){this->esvacia();};
@@ -135,6 +136,7 @@ class Cola:public Lista{
       void desencolar();
       Nodo* ultimo();
       string imprimir(string s);
+      Cola* restoC();
 };
 //-------- Metodos de Cola --------------------
 Nodo* Cola::tope(void)
@@ -152,12 +154,19 @@ Nodo* Cola::ultimo(void)
 string Cola::imprimir(string s)
 {  return this->toPrint(s);
 }
+Cola *Cola::restoC(void)
+{ 
+      Cola *l=new Cola(ultimo()->get_next());
+      return (l);
+}
 
 
 class Asignacion:public Instruccion{
 	public:
+		Asignacion(string s):Instruccion(s){};
 		int buscaValor(Cola* lista, char c); //devuelve el valor de la variable asignada
-	//	*NodoVar buscaVar(); //devulve el nodo de la variable a asignar
+		Nodo* buscaVar(Cola* lista, char c); //devulve el nodo de la variable a asignar
+		void asigna(Cola* lista); // realiza la asignacion
 };
 /*-----------metodos asignacion--------------
 int Asignacion::buscaValor(Cola *lista, char c){
@@ -165,6 +174,18 @@ int Asignacion::buscaValor(Cola *lista, char c){
 		return lista->tope()
 }
 */
+void Asignacion::asigna(Cola* lista){
+	if(this->getInstruccion().at(7)>='0' && this->getInstruccion().at(7)<='9')
+		buscaVar(lista, this->getInstruccion().at(3))->setValor(this->getInstruccion().at(7)-'0');
+	
+}
+
+Nodo* Asignacion::buscaVar(Cola* lista, char c){
+	if(lista->ultimo()->get_dato()->getInstruccion().at(7) == c)
+		return lista->ultimo();
+	else buscaVar(lista->restoC(),c);	
+	
+}
 
 int main(){
 	
@@ -185,17 +206,27 @@ int main(){
 		listaIns->encolar(new Instruccion(instruccion));
 	}
 	archivo.close(); 
-
+	/*while(!listaIns->esvacia()){
+		cout << listaIns->restoC()->ultimo()->get_dato()->getInstruccion();
+		listaIns->borrar();
+	}
+	*/
 	//Este bloque identifica las instrucciones
 	while(!listaIns->esvacia()){
 		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'I' && listaIns->tope()->get_dato()->getInstruccion().at(4) == 'N'){
 			cout << "Declaracion de variable" << endl;
-			listaVar->encolar(listaIns->tope()->get_dato());
-			listaVar->impre();	
+			listaVar->encolar(listaIns->tope()->get_dato());	
 		}	
-		if(listaIns->tope()->get_dato()->getInstruccion().at(3) >= 'a' && listaIns->tope()->get_dato()->getInstruccion().at(3) <= 'z')
+		if(listaIns->tope()->get_dato()->getInstruccion().at(3) >= 'a' && listaIns->tope()->get_dato()->getInstruccion().at(3) <= 'z'){
 			cout << "Asignacion" << endl;
-			
+			Asignacion* a= new Asignacion(listaIns->tope()->get_dato()->getInstruccion());
+			//listaVar->impre();
+			//cout << a->getInstruccion();
+			a->asigna(listaVar);
+			cout<< listaVar->ultimo()->getValor();
+			cout << listaVar->tope()->getValor();	
+		
+		}
 		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'I' && listaIns->tope()->get_dato()->getInstruccion().at(4) == 'F')
 			cout<<"Condicional" << endl;
 		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'J')
