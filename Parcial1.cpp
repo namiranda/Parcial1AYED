@@ -5,31 +5,30 @@
 
 using namespace std;
 
-typedef string tipolista;
+class Instruccion{
+	protected: string instruccion;
+	public: 
+			Instruccion(string s){instruccion = s;}
+			string getInstruccion(){return instruccion;}
+};
 
 class Nodo{
     protected: 
-        tipolista dato;
+        Instruccion *dato;
+		int valor;
         Nodo *next;
     public:
         Nodo() {next=NULL;};
-        Nodo(tipolista a) {dato=a; next=NULL;};
-        void set_dato(tipolista a) {dato=a; };
+        Nodo(Instruccion *a) {dato=a; next=NULL;};
+        void set_dato(Instruccion *a) {dato=a; };
         void set_next(Nodo *n) {next=n; };
-        tipolista get_dato() {return dato; };
+        Instruccion* get_dato() {return dato; };
         Nodo *get_next() {return next; };
         bool es_vacio() {return next==NULL;}
+		void setValor(int v){valor = v;};
+		int getValor(){return valor;};
 };
 
-class NodoVar:public Nodo{
-	protected:  
-			int valor;
-	public: NodoVar (tipolista n) {Nodo();};
-			NodoVar() {Nodo();};
-			void setValor(int v){valor = v;};
-			int getValor(){return valor;};
-			
-};
 
 class Lista{
     private: Nodo *czo;
@@ -37,23 +36,22 @@ class Lista{
             Lista() {czo=new Nodo();};
             Lista(Nodo *n) {czo=n;};
             //~Lista(void);
-            void add(tipolista d);
+            void add(Instruccion* d);
             bool esvacia(void);
-            tipolista cabeza(void);
+            Nodo* cabeza(void);
             Lista *resto(void);
             string toPrint(string p);   
             void impre(void);
             int size();
             void borrar(void); //borra la cabeza
             void borrar_last();//borra el ultimo
-            void concat(Lista *l1);
             Lista *copy(void);
             void tomar(int n);
-            tipolista last();
+            Nodo* last();
 };
 
 //-------- Metodos de Lista -------------------
-tipolista Lista::last()
+Nodo* Lista::last()
 { if(!this->esvacia()){
     if(this->resto()->esvacia())return this->cabeza();
     return this->resto()->last();
@@ -68,11 +66,11 @@ void Lista::impre(void)
 { Nodo *aux;
   aux=czo;
     while(aux->get_next()!=NULL){
-         cout<<aux->get_dato()<<endl;
+         cout<<aux->get_dato()->getInstruccion()<<endl;
          aux=aux->get_next();
     }
 }
-void Lista::add(tipolista d)
+void Lista::add(Instruccion* d)
 {  
      Nodo *nuevo=new Nodo(d);
      nuevo->set_next(czo);
@@ -82,13 +80,13 @@ bool Lista::esvacia(void)
 {   
     return czo->es_vacio();
 }
-tipolista Lista::cabeza(void)
+Nodo* Lista::cabeza(void)
 { 
   if(this->esvacia()){
                 cout<<" Error, Cabeza de lista vacia";
-                return " "; 
+                return 0; 
   }
-  return czo->get_dato();
+  return czo;
 }
 Lista *Lista::resto(void)
 { 
@@ -106,8 +104,6 @@ string Lista::toPrint(string p)
        return stm.str();
      }
 }
-
-
 void Lista::borrar(void)
 { //borra el nodo cabeza
   if(!this->esvacia()){
@@ -126,42 +122,50 @@ void Lista::borrar_last()
       else this->resto()->borrar_last(); 
    }  
 }
-void Lista::concat(Lista *l1)
-{// le transfiere los datos de l1 a this
-   if (!(l1->esvacia())){
-      this->concat(l1->resto());
-      this->add(l1->cabeza());
-   }
-}
+
 
 
 class Cola:public Lista{
   public:
       Cola(void){Lista();};
       ~Cola(void);
-      tipolista tope();
+      Nodo* tope();
       bool colavacia(){this->esvacia();};
-      void encolar(tipolista a) ;
+      void encolar(Instruccion* a) ;
       void desencolar();
-      tipolista ultimo();
+      Nodo* ultimo();
       string imprimir(string s);
 };
 //-------- Metodos de Cola --------------------
-tipolista Cola::tope(void)
+Nodo* Cola::tope(void)
 {  return this->last();
 }
-void Cola::encolar(tipolista a)
+void Cola::encolar(Instruccion* a)
 {  this->add(a);
 }
 void Cola::desencolar(void)
 {  this->borrar_last();
 }
-tipolista Cola::ultimo(void)
+Nodo* Cola::ultimo(void)
 {   return this->cabeza();
 }
 string Cola::imprimir(string s)
 {  return this->toPrint(s);
 }
+
+
+class Asignacion:public Instruccion{
+	public:
+		int buscaValor(Cola* lista, char c); //devuelve el valor de la variable asignada
+	//	*NodoVar buscaVar(); //devulve el nodo de la variable a asignar
+};
+/*-----------metodos asignacion--------------
+int Asignacion::buscaValor(Cola *lista, char c){
+	if(lista->tope().at(7)==c) 
+		return lista->tope()
+}
+*/
+
 int main(){
 	
 	fstream archivo;
@@ -178,30 +182,30 @@ int main(){
 	
 	while(!archivo.eof()){ // mientras no sea el final del archivo
 		getline(archivo, instruccion);
-		listaIns->encolar(instruccion);
-	
+		listaIns->encolar(new Instruccion(instruccion));
 	}
-	archivo.close();	
-	
+	archivo.close(); 
+
 	//Este bloque identifica las instrucciones
 	while(!listaIns->esvacia()){
-		if(listaIns->tope().at(3) == 'I' && listaIns->tope().at(4) == 'N'){
+		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'I' && listaIns->tope()->get_dato()->getInstruccion().at(4) == 'N'){
 			cout << "Declaracion de variable" << endl;
-			listaVar->encolar(listaIns->tope());
-			listaVar->impre();
-				
+			listaVar->encolar(listaIns->tope()->get_dato());
+			listaVar->impre();	
 		}	
-		if(listaIns->tope().at(3) >= 'a' && listaIns->tope().at(3) <= 'z')
+		if(listaIns->tope()->get_dato()->getInstruccion().at(3) >= 'a' && listaIns->tope()->get_dato()->getInstruccion().at(3) <= 'z')
 			cout << "Asignacion" << endl;
-		if(listaIns->tope().at(3) == 'I' && listaIns->tope().at(4) == 'F')
+			
+		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'I' && listaIns->tope()->get_dato()->getInstruccion().at(4) == 'F')
 			cout<<"Condicional" << endl;
-		if(listaIns->tope().at(3) == 'J')
+		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'J')
 			cout << "Jump" << endl;
-		if(listaIns->tope().at(3) == 'S')
+		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'S')
 			cout<<"Show" << endl;
 	 	listaIns->desencolar();
 	}
 	
 	
 }
+
 
