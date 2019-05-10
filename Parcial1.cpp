@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <fstream>
 #include <sstream>
+#include "posfijoEntero.h"
 
 using namespace std;
 
@@ -123,8 +124,6 @@ void Lista::borrar_last()
    }  
 }
 
-
-
 class Cola:public Lista{
   public:
       Cola(void){Lista();};
@@ -175,6 +174,24 @@ int Asignacion::buscaValor(Cola *lista, char c){
 }
 */
 void Asignacion::asigna(Cola* lista){
+	string instruccion = getInstruccion();
+	stringstream ss;
+	int resultado;
+	
+	for(int i= 6; i<instruccion.size(); i++){ //lee la cedena despues del signo igual
+		if(instruccion.at(i)>='a' && instruccion.at(i)<='z'){
+			int valor = buscaVar(lista, instruccion.at(i))->getValor();
+			ss << valor ;
+		}
+		else if(instruccion.at(i)!= 32) //agrega todos los caracteres que no sean el vacio
+			ss << instruccion.at(i);
+
+	}
+	cout << "operacion" << ss.str();
+	resultado = posfijoEntero(ss.str());
+	cout <<"resultado: " << resultado;
+	buscaVar(lista, this->getInstruccion().at(3))->setValor(resultado); //asigno valor a variable mas a la izquierda
+	/*
 	if(this->getInstruccion().at(7)>='0' && this->getInstruccion().at(7)<='9') //numero entero
 		buscaVar(lista, this->getInstruccion().at(3))->setValor(this->getInstruccion().at(7)-'0');
 	if(this->getInstruccion().at(7)>='a' && this->getInstruccion().at(7)<='z'){
@@ -183,7 +200,7 @@ void Asignacion::asigna(Cola* lista){
 			buscaVar(lista, this->getInstruccion().at(3))->setValor(v); //asigno valor a variable mas a la izquierda	
 		}
 	}
-	
+	*/
 }
 
 Nodo* Asignacion::buscaVar(Cola* lista, char c){
@@ -224,8 +241,8 @@ int main(){
 			//listaVar->impre();
 			//cout << a->getInstruccion();
 			a->asigna(listaVar);
-			cout << listaVar->tope()->getValor();
-			cout << listaVar->ultimo()->getValor();
+			//cout << listaVar->tope()->getValor();
+			//cout << listaVar->ultimo()->getValor();
 		}
 		if(listaIns->tope()->get_dato()->getInstruccion().at(3) == 'I' && listaIns->tope()->get_dato()->getInstruccion().at(4) == 'F')
 			cout<<"Condicional" << endl;
