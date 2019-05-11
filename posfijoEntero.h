@@ -171,3 +171,93 @@ int posfijoEntero(string cadena)
 
   return p->tope();
 }
+
+int posfijoBoolean(string cadena)
+{
+   	string pf;
+    Pila *p=new Pila();
+    bool resultado;
+
+// chequeo de la correspondencia de los ()  
+  int error=0;
+  for(int i=0;(i<cadena.length())&&(!error);i++){
+          if (cadena.at(i)=='{') p->apilar('{');       
+          if (cadena.at(i)=='[') p->apilar('[');
+          if (cadena.at(i)=='(') p->apilar('(');
+          
+          if (cadena.at(i)=='}'){
+                                 if (p->pilavacia()) error=1;
+                                 else
+                                     if(p->tope()!='{') error=1;
+                                     else p->desapilar();                     
+          }                               
+          if (cadena.at(i)==']'){
+                                 if (p->pilavacia()) error=1;
+                                 else
+                                     if(p->tope()!='[') error=1;
+                                     else p->desapilar();                     
+          }                               
+          if (cadena.at(i)==')'){
+                                 if (p->pilavacia()) error=1;
+                                 else
+                                     if(p->tope()!='(') error=1;
+                                     else p->desapilar();                     
+          }                               
+    }  
+ //   if((!error)&&p->pilavacia())cout<<endl<<"TOdo OK";
+ //   else cout<<endl<<"ERROR";
+   
+  //  cout<<"\n Inicio conversion a POSFIJO de:"<<cadena<<endl;
+//conversion de entrefijo a posfijo    
+      char d,p1;
+      for(int j=0;j<cadena.length();j++)
+      {   d=cadena.at(j);
+	      if ((d>='0')&&(d<='9'))pf.push_back(d);
+	      else
+	         {
+	           if(p->pilavacia()) p->apilar(d);
+		       else if(d=='=' || d=='!')p->apilar(d);
+	      	 }
+      }
+      while(!p->pilavacia())
+	      {p1=p->tope();p->desapilar();pf.push_back(p1);}
+	      
+    //  cout<<"\n TERMINE la conversion a POSFIJO: "<<pf<<endl;
+      
+// Evaluacion de la expresion en posfijo      
+  int o1,o2;
+  
+  for(int i=0;(i<pf.length())&&(!error);i++){ 
+     d=pf.at(i);
+     if(d>='0' && d<='9') p->apilar(d-'0');
+     if(d=='>'){
+               o2=p->tope(); p->desapilar();
+               o1=p->tope(); p->desapilar(); 
+               resultado = o1>o2;
+     }
+     if(d=='<'){
+               o2=p->tope(); p->desapilar();
+               o1=p->tope(); p->desapilar(); 
+               resultado = o1<o2;
+     }        
+     if(d=='='){
+     		   if((pf.at(i-1)=='=')){
+               o2=p->tope(); p->desapilar();
+               o1=p->tope(); p->desapilar(); 
+               resultado = o1==o2;
+     }}
+	  if(d=='!'){
+	  		   if((pf.at(i-1)=='=')){
+               o2=p->tope(); p->desapilar();
+               o1=p->tope(); p->desapilar(); 
+               resultado = o1!=o2;
+     }}              
+  }
+ // cout<<endl<<"\n\nResultado= "<<resultado<<endl;
+ // if(resultado){
+ // 	cout<<endl<<"todo funciona OK"<<endl;
+//  }
+ 
+  return resultado;
+}
+

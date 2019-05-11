@@ -5,35 +5,35 @@ using namespace std;
 
 typedef long int tipolista;
 
-class Nodo{
+class NodoE{
     protected: 
         tipolista dato;
-        Nodo *next;
+        NodoE *next;
     public:
-        Nodo() {next=NULL;};
-        Nodo(tipolista a) {dato=a; next=NULL;};
+        NodoE() {next=NULL;};
+        NodoE(tipolista a) {dato=a; next=NULL;};
         void set_dato(tipolista a) {dato=a; };
-        void set_next(Nodo *n) {next=n; };
+        void set_next(NodoE *n) {next=n; };
         tipolista get_dato() {return dato; };
-        Nodo *get_next() {return next; };
+        NodoE *get_next() {return next; };
         bool es_vacio() {return next==NULL;}
 };
 
-class Lista{
-    protected: Nodo *czo;
+class ListaE{
+    protected: NodoE *czo;
     public:
-            Lista() {czo=new Nodo();};
-            Lista(Nodo *n) {czo=n;};
+            ListaE() {czo=new NodoE();};
+            ListaE(NodoE *n) {czo=n;};
             void del(void);
             void add(tipolista d);
             bool esvacia(void);
             tipolista cabeza(void);
-            Lista *resto(void);
+            ListaE *resto(void);
 };
 
-class Pila:public Lista{
+class Pila:public ListaE{
       public:
-             Pila(){Lista();};
+             Pila(){ListaE();};
              void apilar(tipolista x){add(x);};
              tipolista tope(void){return cabeza();};
              void desapilar(void){del();};
@@ -41,40 +41,40 @@ class Pila:public Lista{
 };                  
 
 
-void Lista::del(void)
-{    Nodo *aux;
+void ListaE::del(void)
+{    NodoE *aux;
      aux=czo;
      czo=czo->get_next();
      delete aux;
 }
-void Lista::add(tipolista d)
+void ListaE::add(tipolista d)
 {  
-     Nodo *nuevo=new Nodo(d);
+     NodoE *nuevo=new NodoE(d);
      nuevo->set_next(czo);
      czo=nuevo;
 }
-bool Lista::esvacia(void)
+bool ListaE::esvacia(void)
 {   
     return czo->es_vacio();
 }
 
-tipolista Lista::cabeza(void)
+tipolista ListaE::cabeza(void)
 { 
-  if(esvacia()){
+  /*if(esvacia()){
                 cout<<" Error, Cabeza de lista vacia";
                 return ' '; 
-  }
+  }*/
   return czo->get_dato();
 }
 
-Lista *Lista::resto(void)
+ListaE *ListaE::resto(void)
 { 
-      Lista *l=new Lista(czo->get_next());
+      ListaE *l=new ListaE(czo->get_next());
       return (l);
 }
-int main()
+int posfijoBoolean(string cadena)
 {
-    string cadena,pf;
+    string pf;
     Pila *p=new Pila();
     bool resultado;
 
@@ -113,12 +113,14 @@ int main()
       char d,p1;
       for(int j=0;j<cadena.length();j++)
       {   d=cadena.at(j);
-	      if ((d>='0')&&(d<='9'))pf.push_back(d);
-	      else
-	         {
-	           if(p->pilavacia()) p->apilar(d);
-		       else if(d=='=' || d=='!')p->apilar(d);
-	      	 }
+	      if (d!='>' || d!='<' || d!= '!' || d!='='){
+             pf.push_back(d);
+	      }else
+	         { while((!p->pilavacia()))
+	                {p1=p->tope();p->desapilar();pf.push_back(p1);}
+	           if((p->pilavacia())||(d!=')')) p->apilar(d);
+		       else p->desapilar();
+	      }
       }
       while(!p->pilavacia())
 	      {p1=p->tope();p->desapilar();pf.push_back(p1);}
@@ -142,22 +144,17 @@ int main()
                resultado = o1<o2;
      }        
      if(d=='='){
-     		   if((pf.at(i-1)=='=')){
                o2=p->tope(); p->desapilar();
                o1=p->tope(); p->desapilar(); 
                resultado = o1==o2;
-     }}
+     }
 	  if(d=='!'){
-	  		   if((pf.at(i-1)=='=')){
                o2=p->tope(); p->desapilar();
                o1=p->tope(); p->desapilar(); 
                resultado = o1!=o2;
-     }}              
+     }              
   }
   cout<<endl<<"\n\nResultado= "<<resultado<<endl;
-  if(resultado){
-  	cout<<endl<<"todo funciona OK"<<endl;
-  }
  
   cout<<endl;
   system("PAUSE");
