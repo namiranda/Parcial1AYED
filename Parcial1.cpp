@@ -44,6 +44,8 @@ class Lista{
             Lista *copy(void);
             void tomar(int n);
             Nodo* last();
+            void concat(Lista *l1);
+            
 };
 
 //-------- Metodos de Lista -------------------
@@ -58,14 +60,6 @@ int Lista::size()
      if (this->esvacia()) return 0;
      return 1+this->resto()->size();
 }
-/*void Lista::impre(void)
-{ Nodo *aux;
-  aux=czo;
-    while(aux->get_next()!=NULL){
-         cout<<aux->get_dato()->getInstruccion()<<endl;
-         aux=aux->get_next();
-    }
-}*/
 void Lista::add(Instruccion* d)
 {  
      Nodo *nuevo=new Nodo(d);
@@ -117,6 +111,19 @@ void Lista::borrar_last()
       else this->resto()->borrar_last(); 
    }  
 }
+void Lista::concat(Lista *l1)
+{// le transfiere los datos de l1 a this
+   if (!(l1->esvacia())){
+      this->concat(l1->resto());
+      this->add(l1->cabeza()->get_dato());
+   }
+}
+Lista *Lista::copy(void)
+{ 
+      Lista *aux=new Lista();
+      aux->concat(this);
+      return aux;
+}
 
 class Cola:public Lista{
   public:
@@ -130,6 +137,7 @@ class Cola:public Lista{
       Nodo* ultimo();
       string imprimir(string s);
       Cola* restoC();
+      Cola* copyC();
 };
 //--------------------- Metodos de Cola -----------------------
 Nodo* Cola::tope(void)
@@ -152,6 +160,12 @@ Cola *Cola::restoC(void)
       Cola *l=new Cola(ultimo()->get_next());
       return (l);
 }
+Cola *Cola::copyC(void)
+{ 
+      Cola *aux=new Cola();
+      aux->concat(this);
+      return aux;
+}
 class Instruccion{
 	protected: string instruccion;
 	public: 
@@ -163,24 +177,15 @@ class Instruccion{
 };
 //---------------métodos de instruccion-------------------
 int Instruccion::identificaIns(){
-		if(getInstruccion().at(3) == 'I' && getInstruccion().at(4) == 'N'){
-			//cout << "Declaracion de variable" << endl;
+		if(getInstruccion().at(3) == 'I' && getInstruccion().at(4) == 'N')//Declaracion de variable
 			return 0; 
-		}	
-		if(getInstruccion().at(3) >= 'a' && getInstruccion().at(3) <= 'z'){
-			//cout << "Asignacion" << endl;
+		if(getInstruccion().at(3) >= 'a' && getInstruccion().at(3) <= 'z')	//Asignacion;
 			return 1;
-		}
-		if(getInstruccion().at(3) == 'I' && getInstruccion().at(4) == 'F'){
-		//	cout<<"Condicional" << endl;
+		if(getInstruccion().at(3) == 'I' && getInstruccion().at(4) == 'F') //Condicional;
 			return 2;
-		}
-		if(getInstruccion().at(3) == 'J'){
-		//	cout << "Jump" << endl;
+		if(getInstruccion().at(3) == 'J')//Jump
 			return 3;
-		}
-		if(getInstruccion().at(3) == 'S'){
-		//	cout<<"Show" << endl;
+		if(getInstruccion().at(3) == 'S'){	//Show
 			return 4;
 		}
 }
@@ -217,7 +222,9 @@ void Asignacion::asigna(Cola* lista){
 			ss << instruccion.at(j);
 		}
 	}
+	cout<< ss.str();
 	resultado = posfijoEntero(ss.str());
+	cout << "var = " << resultado << endl;
 	buscaVar(lista, this->getInstruccion().at(inicio-3))->setValor(resultado); //asigno valor a variable mas a la izquierda
 
 }
@@ -279,11 +286,8 @@ class Salto:public Instruccion{
 	
 };
 void Salto::saltar(Cola* listaIns, Cola* listaVar, Cola* listaAux){
-	cout<<"ENTRA"<< endl;
 	int posicion = this->getInstruccion().at(getInstruccion().size()-1);
-	cout<<posicion<< endl;
 	int pos = listaAux->ultimo()->get_dato()->getInstruccion().at(0);
-	cout<< "esto " <<pos<<endl;
 	while(!listaAux->esvacia()){
 		
 		if(listaAux->tope()->get_dato()->getInstruccion().at(0)!=posicion){
@@ -291,13 +295,37 @@ void Salto::saltar(Cola* listaIns, Cola* listaVar, Cola* listaAux){
 		}
 		if(listaAux->tope()->get_dato()->getInstruccion().at(0)==posicion){
 			leerInstrucciones(listaAux, listaVar);
-		}
-		if(posicion > pos){
-			leerInstrucciones(listaIns, listaVar);
-		}		
-		
+		}			
 	}
-	cout<<"SALE"<< endl;
+}
+
+class Show:public Instruccion{
+	public:
+		Show(string s):Instruccion(s){};
+		void mostrar(Cola* listaVar);
+	};
+void Show::mostrar(Cola* listaVar){
+	string instruccion = getInstruccion();
+	stringstream ss;
+	int inicio;
+	int resultado;
+	
+	for(int i=0; i<instruccion.size(); i++){ //identifica lo que tiene que mostrar
+		if(instruccion.at(i) == 'W')
+			inicio = i+1;
+	}
+	for(int j= inicio; j<instruccion.size(); j++){ //lee lo que debe mostrar
+		if(instruccion.at(j)>='a' && instruccion.at(j)<='z'){
+			int valor = buscaVar(listaVar, instruccion.at(j))->getValor();
+			ss << valor ;
+		}
+		else if(instruccion.at(j)!= 32){ //agrega todos los caracteres que no sean el vacio
+			ss << instruccion.at(j);
+		}
+	}
+	resultado = posfijoEntero(ss.str());
+	
+	cout<<resultado<< endl;
 }
 
 void Instruccion::ejecutaIns(int i, Cola* listaVar, Cola* listaAux, Cola* listaIns){
@@ -307,8 +335,6 @@ void Instruccion::ejecutaIns(int i, Cola* listaVar, Cola* listaAux, Cola* listaI
 				break;
 			case 1:{	//Asignacion
 				Asignacion* a= new Asignacion(this->getInstruccion());
-				//listaVar->impre();
-				//cout << a->getInstruccion();
 				a->asigna(listaVar);
 				break;
 			}
@@ -324,19 +350,22 @@ void Instruccion::ejecutaIns(int i, Cola* listaVar, Cola* listaAux, Cola* listaI
 				s->saltar(listaIns, listaVar, listaAux);
 				break;
 			}
-			case 4: //show
+			case 4:{//show
+				Show* m = new Show(this->getInstruccion());
+				m->mostrar(listaVar);
 				break;
+			}
 		}
 }
 void leerInstrucciones(Cola* listaIns, Cola* listaVar){
-	Cola* listaAux = new Cola();
-	listaAux = listaIns;
+	Cola* listaAux = listaIns->copyC();
 	while(!listaIns->esvacia()){
 		cout<<listaIns->tope()->get_dato()->getInstruccion() << endl;
 		int i = listaIns->tope()->get_dato()->identificaIns();
 		listaIns->tope()->get_dato()->ejecutaIns(i, listaVar, listaAux, listaIns);
 		listaIns->desencolar();
 	}
+	exit(0);
 }
 int main(){
 	
