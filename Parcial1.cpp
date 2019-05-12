@@ -158,32 +158,31 @@ class Instruccion{
 			Instruccion(string s){instruccion = s;};
 			string getInstruccion(){return instruccion;};
 			int identificaIns();
-			void ejecutaIns(int i, Cola* listaVar);
+			void ejecutaIns(int i, Cola* listaVar, Cola* listaAux, Cola* listaIns);
 			Nodo* buscaVar(Cola* lista, char c); //devulve el nodo de la variable a asignar
 };
 //---------------métodos de instruccion-------------------
 int Instruccion::identificaIns(){
 		if(getInstruccion().at(3) == 'I' && getInstruccion().at(4) == 'N'){
-			cout << "Declaracion de variable" << endl;
+			//cout << "Declaracion de variable" << endl;
 			return 0; 
 		}	
 		if(getInstruccion().at(3) >= 'a' && getInstruccion().at(3) <= 'z'){
-			cout << "Asignacion" << endl;
+			//cout << "Asignacion" << endl;
 			return 1;
 		}
 		if(getInstruccion().at(3) == 'I' && getInstruccion().at(4) == 'F'){
-			cout<<"Condicional" << endl;
+		//	cout<<"Condicional" << endl;
 			return 2;
 		}
 		if(getInstruccion().at(3) == 'J'){
-			cout << "Jump" << endl;
+		//	cout << "Jump" << endl;
 			return 3;
 		}
 		if(getInstruccion().at(3) == 'S'){
-			cout<<"Show" << endl;
+		//	cout<<"Show" << endl;
 			return 4;
 		}
-			
 }
 
 Nodo* Instruccion::buscaVar(Cola* lista, char c){
@@ -272,9 +271,36 @@ int Condicional::identificaThen(){
 	return (new Instruccion(ss.str()))->identificaIns();
 	
 }
+void leerInstrucciones(Cola* listaIns, Cola* listaVar);
+class Salto:public Instruccion{
+	public:
+		Salto(string s):Instruccion(s){};
+		void saltar(Cola* listaIns, Cola* listaVar, Cola* listaAux);
+	
+};
+void Salto::saltar(Cola* listaIns, Cola* listaVar, Cola* listaAux){
+	cout<<"ENTRA"<< endl;
+	int posicion = this->getInstruccion().at(getInstruccion().size()-1);
+	cout<<posicion<< endl;
+	int pos = listaAux->ultimo()->get_dato()->getInstruccion().at(0);
+	cout<< "esto " <<pos<<endl;
+	while(!listaAux->esvacia()){
+		
+		if(listaAux->tope()->get_dato()->getInstruccion().at(0)!=posicion){
+			listaAux->desencolar();
+		}
+		if(listaAux->tope()->get_dato()->getInstruccion().at(0)==posicion){
+			leerInstrucciones(listaAux, listaVar);
+		}
+		if(posicion > pos){
+			leerInstrucciones(listaIns, listaVar);
+		}		
+		
+	}
+	cout<<"SALE"<< endl;
+}
 
-
-void Instruccion::ejecutaIns(int i, Cola* listaVar){
+void Instruccion::ejecutaIns(int i, Cola* listaVar, Cola* listaAux, Cola* listaIns){
 	switch(i){
 			case 0: //Declaracion de variable
 				listaVar->encolar(this);
@@ -289,16 +315,28 @@ void Instruccion::ejecutaIns(int i, Cola* listaVar){
 			case 2:{//condicional
 				Condicional* c= new Condicional(this->getInstruccion());
 				if(c->evaluarCondicion(listaVar)){
-					ejecutaIns(c->identificaThen(), listaVar);
-					//cout<<"TOdo Ok";
+					ejecutaIns(c->identificaThen(), listaVar, listaAux, listaIns);
 				}
 				break;
 			}
-			case 3: //jump
+			case 3:{ //jump
+				Salto* s= new Salto(this->getInstruccion());
+				s->saltar(listaIns, listaVar, listaAux);
 				break;
+			}
 			case 4: //show
 				break;
 		}
+}
+void leerInstrucciones(Cola* listaIns, Cola* listaVar){
+	Cola* listaAux = new Cola();
+	listaAux = listaIns;
+	while(!listaIns->esvacia()){
+		cout<<listaIns->tope()->get_dato()->getInstruccion() << endl;
+		int i = listaIns->tope()->get_dato()->identificaIns();
+		listaIns->tope()->get_dato()->ejecutaIns(i, listaVar, listaAux, listaIns);
+		listaIns->desencolar();
+	}
 }
 int main(){
 	
@@ -319,16 +357,6 @@ int main(){
 		listaIns->encolar(new Instruccion(instruccion));
 	}
 	archivo.close(); 
-
-	//Este bloque ejecuta las instrucciones
-	while(!listaIns->esvacia()){
-		int i = listaIns->tope()->get_dato()->identificaIns();
-		listaIns->tope()->get_dato()->ejecutaIns(i, listaVar);
-		listaIns->desencolar();
 	
-	}
-	
-	
+	leerInstrucciones(listaIns, listaVar);
 }
-
-
