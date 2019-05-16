@@ -233,6 +233,7 @@ void Asignacion::asigna(Cola* lista){
 		}
 	}
 	resultado = posfijoEntero(ss.str());
+	cout<<"var = " << resultado << endl;
 	buscaVar(lista, this->getInstruccion().at(0))->setValor(resultado); //asigno valor a variable mas a la izquierda
 	
 }
@@ -290,8 +291,21 @@ class Salto:public Instruccion{
 	
 };
 void Salto::saltar(Cola* listaVar, Cola* listaAux){
+	int inicio;
+	stringstream ss;
+	for(int i=0; i<this->getInstruccion().size(); i++){
+		if(getInstruccion().at(i) == 'P'){
+			inicio = i+1;
+		}
+	}
+	for(int j=inicio; j<this->getInstruccion().size();j++){
+		ss <<getInstruccion().at(j);
+	}
+	int aux;
+	ss >> aux;
+	int posicion = static_cast<int>(aux);
 
-	int posicion = this->getInstruccion().at(getInstruccion().size()-1)-'0';
+	
 	while(!listaAux->esvacia()){
 		
 		if(listaAux->tope()->get_dato()->getIndice()!=posicion){
