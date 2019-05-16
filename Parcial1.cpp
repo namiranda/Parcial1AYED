@@ -166,54 +166,64 @@ Cola *Cola::copyC(void)
       aux->concat(this);
       return aux;
 }
+//---------------------------------clase INSTRUCCION------------------------------------
 class Instruccion{
 	protected: string instruccion;
+				int index;
 	public: 
-			Instruccion(string s){instruccion = s;};
+			Instruccion(string s, int i);
 			string getInstruccion(){return instruccion;};
 			int identificaIns();
-			void ejecutaIns(int i, Cola* listaVar, Cola* listaAux, Cola* listaIns);
+			void ejecutaIns(int i, Cola* listaVar, Cola* listaAux );
 			Nodo* buscaVar(Cola* lista, char c); //devulve el nodo de la variable a asignar
+			int getIndice(){return index;}
 };
-//---------------métodos de instruccion-------------------
+Instruccion::Instruccion(string s, int i){
+	instruccion = s;
+	index = i;
+}
 int Instruccion::identificaIns(){
-		if(getInstruccion().at(3) == 'I' && getInstruccion().at(4) == 'N')//Declaracion de variable
+		string instruccion = getInstruccion();
+		stringstream ss;
+		
+		for(int j=0; j<instruccion.size(); j++)
+		 	if(instruccion.at(j)!= 32) //agrega todos los caracteres que no sean el vacio
+				ss << instruccion.at(j);
+		
+		instruccion = ss.str();
+		
+		if(instruccion.at(0) == 'I' && instruccion.at(1) == 'N')//Declaracion de variable
 			return 0; 
-		if(getInstruccion().at(3) >= 'a' && getInstruccion().at(3) <= 'z')	//Asignacion;
+		if(instruccion.at(0) >= 'a' && instruccion.at(0) <= 'z')	//Asignacion;
 			return 1;
-		if(getInstruccion().at(3) == 'I' && getInstruccion().at(4) == 'F') //Condicional;
+		if(instruccion.at(0) == 'I' &&instruccion.at(1) == 'F') //Condicional;
 			return 2;
-		if(getInstruccion().at(3) == 'J')//Jump
+		if(instruccion.at(0) == 'J')//Jump
 			return 3;
-		if(getInstruccion().at(3) == 'S'){	//Show
+		if(instruccion.at(0) == 'S'){	//Show
 			return 4;
 		}
 }
 
 Nodo* Instruccion::buscaVar(Cola* lista, char c){
-	if(lista->ultimo()->get_dato()->getInstruccion().at(7) == c)
+	if(lista->ultimo()->get_dato()->getInstruccion().at(3) == c)
 		return lista->ultimo();
 	else buscaVar(lista->restoC(),c);	
 }
 
+//---------------------------------clase ASIGNACION------------------------------------
 class Asignacion:public Instruccion{
 	public:
-		Asignacion(string s):Instruccion(s){};
+		Asignacion(string s, int i):Instruccion(s, i){};
 		void asigna(Cola* lista); // realiza la asignacion
 };
-//-----------metodos asignacion--------------
 
 void Asignacion::asigna(Cola* lista){
 	string instruccion = getInstruccion();
 	stringstream ss;
-	int inicio, resultado;
+	int  resultado;
 	
-	for(int i=0; i<instruccion.size(); i++){ //identifica algo
-		if(instruccion.at(i) == '=')
-			inicio = i+1;
-	}
-	
-	for(int j= inicio; j<instruccion.size(); j++){ //lee la cedena despues del signo igual
+	for(int j=2; j<instruccion.size(); j++){ //lee la cedena despues del signo igual
 		if(instruccion.at(j)>='a' && instruccion.at(j)<='z'){
 			int valor = buscaVar(lista, instruccion.at(j))->getValor();
 			ss << valor ;
@@ -222,20 +232,17 @@ void Asignacion::asigna(Cola* lista){
 			ss << instruccion.at(j);
 		}
 	}
-	cout<< ss.str();
 	resultado = posfijoEntero(ss.str());
-	cout << "var = " << resultado << endl;
-	buscaVar(lista, this->getInstruccion().at(inicio-3))->setValor(resultado); //asigno valor a variable mas a la izquierda
-
+	buscaVar(lista, this->getInstruccion().at(0))->setValor(resultado); //asigno valor a variable mas a la izquierda
+	
 }
-
+//--------------------------------clase CONDICIONAL---------------------------------
 class Condicional:public Instruccion{
 	public:
-		Condicional(string s):Instruccion(s){};
+		Condicional(string s, int i):Instruccion(s,i){};
 		bool evaluarCondicion(Cola* lista);
 		int identificaThen();
 };
-//-----------metodos condicional--------------
 bool Condicional::evaluarCondicion(Cola* lista){
 	string instruccion = getInstruccion();
 	int inicio, fin;
@@ -267,54 +274,47 @@ int Condicional::identificaThen(){
 	stringstream ss;
 	bool resultado;
 	
-	for(int i=0; i<instruccion.size(); i++){ //identifica el comienzo de la instruccion
-		if(instruccion.at(i) == 'E')
-			inicio = i;
-	}
-	
-	for(int j=inicio; j<instruccion.size(); j++){ //copia la instruccion despues del then
+	for(int j=11; j<instruccion.size(); j++){ //copia la instruccion despues del then
 		ss<<instruccion.at(j);
 	}
-	return (new Instruccion(ss.str()))->identificaIns();
+	return (new Instruccion(ss.str(),0))->identificaIns();
+	
 	
 }
 void leerInstrucciones(Cola* listaIns, Cola* listaVar);
+//----------------------------------clase JUMP----------------------------------
 class Salto:public Instruccion{
 	public:
-		Salto(string s):Instruccion(s){};
-		void saltar(Cola* listaIns, Cola* listaVar, Cola* listaAux);
+		Salto(string s,int i):Instruccion(s,i){};
+		void saltar(Cola* listaVar, Cola* listaAux);
 	
 };
-void Salto::saltar(Cola* listaIns, Cola* listaVar, Cola* listaAux){
-	int posicion = this->getInstruccion().at(getInstruccion().size()-1);
-	int pos = listaAux->ultimo()->get_dato()->getInstruccion().at(0);
+void Salto::saltar(Cola* listaVar, Cola* listaAux){
+
+	int posicion = this->getInstruccion().at(getInstruccion().size()-1)-'0';
 	while(!listaAux->esvacia()){
 		
-		if(listaAux->tope()->get_dato()->getInstruccion().at(0)!=posicion){
+		if(listaAux->tope()->get_dato()->getIndice()!=posicion){
 			listaAux->desencolar();
 		}
-		if(listaAux->tope()->get_dato()->getInstruccion().at(0)==posicion){
+		if(listaAux->tope()->get_dato()->getIndice()==posicion){
 			leerInstrucciones(listaAux, listaVar);
 		}			
 	}
 }
 
+//-----------------------------------clase SHOW---------------------------------
 class Show:public Instruccion{
 	public:
-		Show(string s):Instruccion(s){};
+		Show(string s, int i):Instruccion(s, i){};
 		void mostrar(Cola* listaVar);
 	};
 void Show::mostrar(Cola* listaVar){
 	string instruccion = getInstruccion();
 	stringstream ss;
-	int inicio;
 	int resultado;
 	
-	for(int i=0; i<instruccion.size(); i++){ //identifica lo que tiene que mostrar
-		if(instruccion.at(i) == 'W')
-			inicio = i+1;
-	}
-	for(int j= inicio; j<instruccion.size(); j++){ //lee lo que debe mostrar
+	for(int j=4 ; j<instruccion.size(); j++){ //lee lo que debe mostrar
 		if(instruccion.at(j)>='a' && instruccion.at(j)<='z'){
 			int valor = buscaVar(listaVar, instruccion.at(j))->getValor();
 			ss << valor ;
@@ -327,31 +327,32 @@ void Show::mostrar(Cola* listaVar){
 	
 	cout<<resultado<< endl;
 }
-
-void Instruccion::ejecutaIns(int i, Cola* listaVar, Cola* listaAux, Cola* listaIns){
+//-------------------------------------------------------------------------------------
+void Instruccion::ejecutaIns(int i, Cola* listaVar, Cola* listaAux){
 	switch(i){
-			case 0: //Declaracion de variable
+			case 0:{ //Declaracion de variable
 				listaVar->encolar(this);
 				break;
+			}
 			case 1:{	//Asignacion
-				Asignacion* a= new Asignacion(this->getInstruccion());
+				Asignacion* a= new Asignacion(this->getInstruccion(),this->getIndice());
 				a->asigna(listaVar);
 				break;
 			}
 			case 2:{//condicional
-				Condicional* c= new Condicional(this->getInstruccion());
+				Condicional* c= new Condicional(this->getInstruccion(), this->getIndice());
 				if(c->evaluarCondicion(listaVar)){
-					ejecutaIns(c->identificaThen(), listaVar, listaAux, listaIns);
+					ejecutaIns(c->identificaThen(), listaVar, listaAux);
 				}
 				break;
 			}
 			case 3:{ //jump
-				Salto* s= new Salto(this->getInstruccion());
-				s->saltar(listaIns, listaVar, listaAux);
+				Salto* s= new Salto(this->getInstruccion(), this->getIndice());
+				s->saltar(listaVar, listaAux);
 				break;
 			}
 			case 4:{//show
-				Show* m = new Show(this->getInstruccion());
+				Show* m = new Show(this->getInstruccion(), this->getIndice());
 				m->mostrar(listaVar);
 				break;
 			}
@@ -362,7 +363,7 @@ void leerInstrucciones(Cola* listaIns, Cola* listaVar){
 	while(!listaIns->esvacia()){
 		cout<<listaIns->tope()->get_dato()->getInstruccion() << endl;
 		int i = listaIns->tope()->get_dato()->identificaIns();
-		listaIns->tope()->get_dato()->ejecutaIns(i, listaVar, listaAux, listaIns);
+		listaIns->tope()->get_dato()->ejecutaIns(i, listaVar, listaAux);
 		listaIns->desencolar();
 	}
 	exit(0);
@@ -373,6 +374,8 @@ int main(){
 	string instruccion;
 	Cola *listaIns = new Cola(); //puntero a lista con instrucciones
 	Cola *listaVar = new Cola();
+	int indice = 0;
+	
 	
 	archivo.open("programa.txt", ios::in); //abre archivo en modo lectura
 	
@@ -383,7 +386,15 @@ int main(){
 	
 	while(!archivo.eof()){ // mientras no sea el final del archivo
 		getline(archivo, instruccion);
-		listaIns->encolar(new Instruccion(instruccion));
+		stringstream ss;
+		
+		for(int j=0; j<instruccion.size(); j++)
+		 	if(instruccion.at(j)!= 32) //agrega todos los caracteres que no sean el vacio
+				ss << instruccion.at(j);
+		
+		instruccion = ss.str();
+		indice++;
+		listaIns->encolar(new Instruccion(instruccion, indice));
 	}
 	archivo.close(); 
 	
