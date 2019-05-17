@@ -1,9 +1,15 @@
 INT a
 INT b
+INT c
+INT d
 a = 4
 b = 1
-IF ( a < 1) THEN JUMP 9
+c = 2 * a
+d = 1
+IF ( a < 1) THEN JUMP 13
 b = b * a
 a = a - 1
-JUMP 5
-SHOW b
+JUMP 9
+SHOW b+9
+d=c+d
+SHOW d
