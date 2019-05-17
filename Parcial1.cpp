@@ -184,13 +184,6 @@ Instruccion::Instruccion(string s, int i){
 }
 int Instruccion::identificaIns(){
 		string instruccion = getInstruccion();
-		stringstream ss;
-		
-		for(int j=0; j<instruccion.size(); j++)
-		 	if(instruccion.at(j)!= 32) //agrega todos los caracteres que no sean el vacio
-				ss << instruccion.at(j);
-		
-		instruccion = ss.str();
 		
 		if(instruccion.at(0) == 'I' && instruccion.at(1) == 'N')//Declaracion de variable
 			return 0; 
@@ -228,9 +221,9 @@ void Asignacion::asigna(Cola* lista){
 			int valor = buscaVar(lista, instruccion.at(j))->getValor();
 			ss << valor ;
 		}
-		else if(instruccion.at(j)!= 32){ //agrega todos los caracteres que no sean el vacio
+		else //agrega todos los caracteres que no sean el vacio
 			ss << instruccion.at(j);
-		}
+		
 	}
 	resultado = posfijoEntero(ss.str());
 	cout<<"var = " << resultado << endl;
@@ -262,7 +255,7 @@ bool Condicional::evaluarCondicion(Cola* lista){
 			int valor = buscaVar(lista, instruccion.at(j))->getValor();
 			ss << valor ;
 		}
-		else if(instruccion.at(j)!= 32) //agrega todos los caracteres que no sean el vacio
+		else 
 			ss << instruccion.at(j);
 	}	
 	resultado = posfijoBoolean(ss.str());
@@ -293,6 +286,7 @@ class Salto:public Instruccion{
 void Salto::saltar(Cola* listaVar, Cola* listaAux){
 	int inicio;
 	stringstream ss;
+
 	for(int i=0; i<this->getInstruccion().size(); i++){
 		if(getInstruccion().at(i) == 'P'){
 			inicio = i+1;
@@ -333,9 +327,9 @@ void Show::mostrar(Cola* listaVar){
 			int valor = buscaVar(listaVar, instruccion.at(j))->getValor();
 			ss << valor ;
 		}
-		else if(instruccion.at(j)!= 32){ //agrega todos los caracteres que no sean el vacio
+		else  //agrega todos los caracteres que no sean el vacio
 			ss << instruccion.at(j);
-		}
+		
 	}
 	resultado = posfijoEntero(ss.str());
 	
