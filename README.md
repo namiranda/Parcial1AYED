@@ -1,7 +1,7 @@
 # Parcial1AYED
 
-Desarrollar una máquina que ejecute un programa almacenado en un ar-
-chivo como una secuencia de instrucciones. Las instrucciones del programa
+Desarrollar una máquina que ejecute un programa almacenado en un archivo 
+como una secuencia de instrucciones. Las instrucciones del programa
 serán escritas en un lenguaje de programación elemental AYED19, que será
 descripto a continuación. En el lenguaje AYED19 cada instrucción ocupa un
 reglon. Hay 5 tipos de instrucciones:
@@ -27,7 +27,7 @@ tinto (!=), menor (<) y mayor (> )
 4) Show. Es un comando que permite imprimir por pantalla el valor de
 una expresion aritmetica definida anteriormente.
 
-5) Salto. Cada instrucción del programa tiene asignado un n´umero que
+5) Salto. Cada instrucción del programa tiene asignado un número que
 representa su posición en la secuencia del programa, comenzando desde 1.
 La instrucción JUMP contiene un número que hace referencia al salto en el
 flujo de ejecución del programa hacia la instrucción dada por el número.
